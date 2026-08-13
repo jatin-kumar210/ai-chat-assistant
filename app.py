@@ -1,5 +1,4 @@
 import os
-
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
@@ -11,15 +10,10 @@ from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 
 load_dotenv()
 
-
-# =========================================================
-# GET HUGGING FACE TOKEN
-# =========================================================
-
-# Local computer -> .env
+# Local .env
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Streamlit Cloud -> Secrets
+# Streamlit Cloud Secrets
 if not HF_TOKEN:
     try:
         HF_TOKEN = st.secrets["HF_TOKEN"]
@@ -47,7 +41,7 @@ st.markdown(
     """
     <style>
 
-    /* Main background */
+    /* Main application */
     .stApp {
         background: linear-gradient(
             135deg,
@@ -58,14 +52,16 @@ st.markdown(
         color: white;
     }
 
+
     /* Main title */
     .main-title {
         text-align: center;
-        font-size: 46px;
+        font-size: 45px;
         font-weight: 800;
         margin-top: 20px;
         margin-bottom: 5px;
     }
+
 
     /* Subtitle */
     .subtitle {
@@ -75,61 +71,71 @@ st.markdown(
         margin-bottom: 35px;
     }
 
+
     /* Sidebar */
     section[data-testid="stSidebar"] {
         background-color: #020617;
         border-right: 1px solid #1e293b;
     }
 
-    /* Sidebar title */
-    .sidebar-title {
-        font-size: 25px;
-        font-weight: 700;
-    }
 
-    /* Welcome card */
-    .welcome-card {
-        background: linear-gradient(
-            135deg,
-            #0f172a,
-            #1e293b
-        );
-
-        border: 1px solid #334155;
-
-        border-radius: 22px;
-
-        padding: 35px;
-
-        text-align: center;
-
-        margin-bottom: 30px;
-
-        box-shadow:
-            0 10px 30px rgba(0, 0, 0, 0.25);
-    }
-
-    .welcome-card h2 {
-        font-size: 28px;
-        margin-bottom: 12px;
-    }
-
-    .welcome-card p {
-        color: #94a3b8;
+    /* User message */
+    .user-message {
+        background: #2563eb;
+        padding: 16px 20px;
+        border-radius: 18px 18px 5px 18px;
+        margin: 15px 0 15px auto;
+        max-width: 75%;
+        color: white;
         font-size: 16px;
     }
 
-    /* Chat messages */
-    [data-testid="stChatMessage"] {
-        border-radius: 18px;
-        margin-bottom: 15px;
+
+    /* AI message */
+    .ai-message {
+        background: #1e293b;
+        border: 1px solid #334155;
+        padding: 16px 20px;
+        border-radius: 18px 18px 18px 5px;
+        margin: 15px auto 15px 0;
+        max-width: 75%;
+        color: #e2e8f0;
+        font-size: 16px;
     }
+
+
+    /* Welcome card */
+    .welcome-card {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+
+    .welcome-card h2 {
+        margin-bottom: 10px;
+    }
+
+
+    .welcome-card p {
+        color: #94a3b8;
+    }
+
+
+    /* Sidebar headings */
+    .sidebar-title {
+        font-size: 24px;
+        font-weight: 700;
+    }
+
 
     /* Buttons */
     .stButton > button {
-        border-radius: 12px;
+        border-radius: 10px;
         font-weight: 600;
-        height: 45px;
     }
 
     </style>
@@ -139,7 +145,7 @@ st.markdown(
 
 
 # =========================================================
-# LOAD AI MODEL
+# MODEL
 # =========================================================
 
 @st.cache_resource
@@ -156,22 +162,14 @@ def load_model():
             huggingfacehub_api_token=HF_TOKEN
         )
 
-        model = ChatHuggingFace(
-            llm=llm
-        )
+        model = ChatHuggingFace(llm=llm)
 
         return model
 
-    except Exception as e:
-
-        st.error(
-            f"❌ Model loading failed: {str(e)}"
-        )
-
+    except Exception:
         return None
 
 
-# Load model
 model = load_model()
 
 
@@ -230,9 +228,7 @@ with st.sidebar:
 # =========================================================
 
 st.markdown(
-    '<div class="main-title">'
-    '🤖 GenAI Chat Assistant'
-    '</div>',
+    '<div class="main-title">🤖 GenAI Chat Assistant</div>',
     unsafe_allow_html=True
 )
 
@@ -245,7 +241,7 @@ st.markdown(
 
 
 # =========================================================
-# TOKEN CHECK
+# API TOKEN CHECK
 # =========================================================
 
 if not HF_TOKEN:
@@ -255,8 +251,9 @@ if not HF_TOKEN:
     )
 
     st.info(
-        "For Streamlit Cloud, add HF_TOKEN "
-        "inside Settings → Secrets."
+        "For Streamlit Cloud: "
+        "Go to Manage app → Settings → Secrets "
+        "and add HF_TOKEN."
     )
 
     st.stop()
@@ -269,7 +266,7 @@ if not HF_TOKEN:
 if model is None:
 
     st.error(
-        "❌ AI model could not be initialized."
+        "❌ Unable to initialize the Hugging Face model."
     )
 
     st.stop()
@@ -288,9 +285,8 @@ if len(st.session_state.messages) == 0:
             <h2>👋 Welcome to GenAI Chat Assistant</h2>
 
             <p>
-                Your AI-powered assistant for learning,
-                exploring ideas, solving problems,
-                and having intelligent conversations.
+                Ask questions, learn concepts, generate ideas,
+                or simply have a conversation with AI.
             </p>
 
         </div>
@@ -305,36 +301,31 @@ if len(st.session_state.messages) == 0:
 
 for message in st.session_state.messages:
 
-    # -----------------------------------------------------
-    # USER MESSAGE
-    # -----------------------------------------------------
-
     if message["role"] == "user":
 
-        with st.chat_message(
-            "user",
-            avatar="👨‍💻"
-        ):
-
-            st.markdown(
-                message["content"]
-            )
-
-
-    # -----------------------------------------------------
-    # AI MESSAGE
-    # -----------------------------------------------------
+        st.markdown(
+            f"""
+            <div class="user-message">
+                <b>🧑 You</b>
+                <br><br>
+                {message["content"]}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     else:
 
-        with st.chat_message(
-            "assistant",
-            avatar="🤖"
-        ):
-
-            st.markdown(
-                message["content"]
-            )
+        st.markdown(
+            f"""
+            <div class="ai-message">
+                <b>🤖 AI</b>
+                <br><br>
+                {message["content"]}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 
 # =========================================================
@@ -347,7 +338,7 @@ question = st.chat_input(
 
 
 # =========================================================
-# GENERATE AI RESPONSE
+# GENERATE RESPONSE
 # =========================================================
 
 if question:
@@ -368,47 +359,33 @@ if question:
     # DISPLAY USER MESSAGE
     # -----------------------------------------------------
 
-    with st.chat_message(
-        "user",
-        avatar="👨‍💻"
-    ):
-
-        st.markdown(
-            question
-        )
+    st.markdown(
+        f"""
+        <div class="user-message">
+            <b>🧑 You</b>
+            <br><br>
+            {question}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
     # -----------------------------------------------------
     # GENERATE AI RESPONSE
     # -----------------------------------------------------
 
-    with st.chat_message(
-        "assistant",
-        avatar="🤖"
-    ):
+    with st.spinner("🤔 AI is thinking..."):
 
-        with st.spinner(
-            "🤔 AI is thinking..."
-        ):
+        try:
 
-            try:
+            result = model.invoke(question)
 
-                result = model.invoke(
-                    question
-                )
+            answer = result.content
 
-                answer = result.content
+        except Exception as e:
 
-            except Exception as e:
-
-                answer = (
-                    "❌ Something went wrong.\n\n"
-                    f"Error: {str(e)}"
-                )
-
-        st.markdown(
-            answer
-        )
+            answer = f"❌ Error: {str(e)}"
 
 
     # -----------------------------------------------------
@@ -420,4 +397,20 @@ if question:
             "role": "assistant",
             "content": answer
         }
+    )
+
+
+    # -----------------------------------------------------
+    # DISPLAY AI RESPONSE
+    # -----------------------------------------------------
+
+    st.markdown(
+        f"""
+        <div class="ai-message">
+            <b>🤖 AI</b>
+            <br><br>
+            {answer}
+        </div>
+        """,
+        unsafe_allow_html=True
     )
