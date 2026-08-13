@@ -14,15 +14,12 @@ load_dotenv()
 
 # =========================================================
 # GET HUGGING FACE TOKEN
-# Local:
-#     .env
-#
-# Streamlit Cloud:
-#     Settings → Secrets
 # =========================================================
 
+# Local computer -> .env
 HF_TOKEN = os.getenv("HF_TOKEN")
 
+# Streamlit Cloud -> Secrets
 if not HF_TOKEN:
     try:
         HF_TOKEN = st.secrets["HF_TOKEN"]
@@ -50,7 +47,7 @@ st.markdown(
     """
     <style>
 
-    /* Main application */
+    /* Main background */
     .stApp {
         background: linear-gradient(
             135deg,
@@ -64,7 +61,7 @@ st.markdown(
     /* Main title */
     .main-title {
         text-align: center;
-        font-size: 45px;
+        font-size: 46px;
         font-weight: 800;
         margin-top: 20px;
         margin-bottom: 5px;
@@ -84,34 +81,55 @@ st.markdown(
         border-right: 1px solid #1e293b;
     }
 
+    /* Sidebar title */
+    .sidebar-title {
+        font-size: 25px;
+        font-weight: 700;
+    }
+
     /* Welcome card */
     .welcome-card {
-        background: #0f172a;
+        background: linear-gradient(
+            135deg,
+            #0f172a,
+            #1e293b
+        );
+
         border: 1px solid #334155;
-        border-radius: 20px;
-        padding: 30px;
+
+        border-radius: 22px;
+
+        padding: 35px;
+
         text-align: center;
+
         margin-bottom: 30px;
+
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.25);
     }
 
     .welcome-card h2 {
-        margin-bottom: 10px;
+        font-size: 28px;
+        margin-bottom: 12px;
     }
 
     .welcome-card p {
         color: #94a3b8;
+        font-size: 16px;
     }
 
-    /* Sidebar title */
-    .sidebar-title {
-        font-size: 24px;
-        font-weight: 700;
+    /* Chat messages */
+    [data-testid="stChatMessage"] {
+        border-radius: 18px;
+        margin-bottom: 15px;
     }
 
     /* Buttons */
     .stButton > button {
-        border-radius: 10px;
+        border-radius: 12px;
         font-weight: 600;
+        height: 45px;
     }
 
     </style>
@@ -191,7 +209,6 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # Clear chat button
     if st.button(
         "🗑️ Clear Chat",
         use_container_width=True
@@ -271,8 +288,9 @@ if len(st.session_state.messages) == 0:
             <h2>👋 Welcome to GenAI Chat Assistant</h2>
 
             <p>
-                Ask questions, learn concepts, generate ideas,
-                or simply have a conversation with AI.
+                Your AI-powered assistant for learning,
+                exploring ideas, solving problems,
+                and having intelligent conversations.
             </p>
 
         </div>
@@ -287,17 +305,32 @@ if len(st.session_state.messages) == 0:
 
 for message in st.session_state.messages:
 
+    # -----------------------------------------------------
+    # USER MESSAGE
+    # -----------------------------------------------------
+
     if message["role"] == "user":
 
-        with st.chat_message("user"):
+        with st.chat_message(
+            "user",
+            avatar="👨‍💻"
+        ):
 
             st.markdown(
                 message["content"]
             )
 
+
+    # -----------------------------------------------------
+    # AI MESSAGE
+    # -----------------------------------------------------
+
     else:
 
-        with st.chat_message("assistant"):
+        with st.chat_message(
+            "assistant",
+            avatar="🤖"
+        ):
 
             st.markdown(
                 message["content"]
@@ -335,22 +368,34 @@ if question:
     # DISPLAY USER MESSAGE
     # -----------------------------------------------------
 
-    with st.chat_message("user"):
+    with st.chat_message(
+        "user",
+        avatar="👨‍💻"
+    ):
 
-        st.markdown(question)
+        st.markdown(
+            question
+        )
 
 
     # -----------------------------------------------------
     # GENERATE AI RESPONSE
     # -----------------------------------------------------
 
-    with st.chat_message("assistant"):
+    with st.chat_message(
+        "assistant",
+        avatar="🤖"
+    ):
 
-        with st.spinner("🤔 AI is thinking..."):
+        with st.spinner(
+            "🤔 AI is thinking..."
+        ):
 
             try:
 
-                result = model.invoke(question)
+                result = model.invoke(
+                    question
+                )
 
                 answer = result.content
 
@@ -361,7 +406,9 @@ if question:
                     f"Error: {str(e)}"
                 )
 
-        st.markdown(answer)
+        st.markdown(
+            answer
+        )
 
 
     # -----------------------------------------------------
