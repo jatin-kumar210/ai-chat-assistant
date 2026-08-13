@@ -280,21 +280,35 @@ if model is None:
 # WELCOME SCREEN
 # =========================================================
 
+# =========================================================
+# WELCOME SCREEN
+# =========================================================
+
 if len(st.session_state.messages) == 0:
 
     st.markdown(
         """
-<div class="welcome-card">
-    <h2>👋 Welcome to GenAI Chat Assistant</h2>
-
-    <p>
-        Ask questions, learn concepts, generate ideas,
-        or simply have a conversation with AI.
-    </p>
-</div>
+        <div class="welcome-card">
         """,
         unsafe_allow_html=True
     )
+
+    st.markdown(
+        "## 👋 Welcome to GenAI Chat Assistant"
+    )
+
+    st.markdown(
+        """
+        Ask questions, learn concepts, generate ideas,
+        or simply have a conversation with AI.
+        """
+    )
+
+    st.markdown(
+        "</div>",
+        unsafe_allow_html=True
+    )
+    
 
 # =========================================================
 # DISPLAY CHAT HISTORY
