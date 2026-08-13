@@ -1,4 +1,5 @@
 import os
+
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
@@ -13,9 +14,11 @@ load_dotenv()
 
 # =========================================================
 # GET HUGGING FACE TOKEN
-# Works on both:
-# 1. Local computer -> .env
-# 2. Streamlit Cloud -> Secrets
+# Local:
+#     .env
+#
+# Streamlit Cloud:
+#     Settings → Secrets
 # =========================================================
 
 HF_TOKEN = os.getenv("HF_TOKEN")
@@ -81,29 +84,6 @@ st.markdown(
         border-right: 1px solid #1e293b;
     }
 
-    /* User message */
-    .user-message {
-        background: #2563eb;
-        padding: 16px 20px;
-        border-radius: 18px 18px 5px 18px;
-        margin: 15px 0 15px auto;
-        max-width: 75%;
-        color: white;
-        font-size: 16px;
-    }
-
-    /* AI message */
-    .ai-message {
-        background: #1e293b;
-        border: 1px solid #334155;
-        padding: 16px 20px;
-        border-radius: 18px 18px 18px 5px;
-        margin: 15px auto 15px 0;
-        max-width: 75%;
-        color: #e2e8f0;
-        font-size: 16px;
-    }
-
     /* Welcome card */
     .welcome-card {
         background: #0f172a;
@@ -147,7 +127,6 @@ st.markdown(
 @st.cache_resource
 def load_model():
 
-    # Check token
     if not HF_TOKEN:
         return None
 
@@ -201,9 +180,7 @@ with st.sidebar:
 
     st.markdown("### 🧠 Model")
 
-    st.info(
-        "Qwen 2.5 7B Instruct"
-    )
+    st.info("Qwen 2.5 7B Instruct")
 
     st.markdown("### 🛠️ Technologies")
 
@@ -214,6 +191,7 @@ with st.sidebar:
 
     st.markdown("---")
 
+    # Clear chat button
     if st.button(
         "🗑️ Clear Chat",
         use_container_width=True
@@ -293,8 +271,8 @@ if len(st.session_state.messages) == 0:
             <h2>👋 Welcome to GenAI Chat Assistant</h2>
 
             <p>
-            Ask questions, learn concepts, generate ideas,
-            or simply have a conversation with AI.
+                Ask questions, learn concepts, generate ideas,
+                or simply have a conversation with AI.
             </p>
 
         </div>
@@ -311,37 +289,19 @@ for message in st.session_state.messages:
 
     if message["role"] == "user":
 
-        st.markdown(
-            f"""
-            <div class="user-message">
+        with st.chat_message("user"):
 
-                <b>🧑 You</b>
-
-                <br><br>
-
-                {message["content"]}
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+            st.markdown(
+                message["content"]
+            )
 
     else:
 
-        st.markdown(
-            f"""
-            <div class="ai-message">
+        with st.chat_message("assistant"):
 
-                <b>🤖 AI</b>
-
-                <br><br>
-
-                {message["content"]}
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+            st.markdown(
+                message["content"]
+            )
 
 
 # =========================================================
@@ -375,40 +335,33 @@ if question:
     # DISPLAY USER MESSAGE
     # -----------------------------------------------------
 
-    st.markdown(
-        f"""
-        <div class="user-message">
+    with st.chat_message("user"):
 
-            <b>🧑 You</b>
-
-            <br><br>
-
-            {question}
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        st.markdown(question)
 
 
     # -----------------------------------------------------
-    # GENERATE RESPONSE
+    # GENERATE AI RESPONSE
     # -----------------------------------------------------
 
-    with st.spinner("🤔 AI is thinking..."):
+    with st.chat_message("assistant"):
 
-        try:
+        with st.spinner("🤔 AI is thinking..."):
 
-            result = model.invoke(question)
+            try:
 
-            answer = result.content
+                result = model.invoke(question)
 
-        except Exception as e:
+                answer = result.content
 
-            answer = (
-                f"❌ Error while generating response:\n\n"
-                f"{str(e)}"
-            )
+            except Exception as e:
+
+                answer = (
+                    "❌ Something went wrong.\n\n"
+                    f"Error: {str(e)}"
+                )
+
+        st.markdown(answer)
 
 
     # -----------------------------------------------------
@@ -420,24 +373,4 @@ if question:
             "role": "assistant",
             "content": answer
         }
-    )
-
-
-    # -----------------------------------------------------
-    # DISPLAY AI RESPONSE
-    # -----------------------------------------------------
-
-    st.markdown(
-        f"""
-        <div class="ai-message">
-
-            <b>🤖 AI</b>
-
-            <br><br>
-
-            {answer}
-
-        </div>
-        """,
-        unsafe_allow_html=True
     )
