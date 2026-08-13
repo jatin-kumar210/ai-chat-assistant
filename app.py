@@ -10,10 +10,10 @@ from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 
 load_dotenv()
 
-# Local .env
+# Get Hugging Face token from local .env
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Streamlit Cloud Secrets
+# Get Hugging Face token from Streamlit Cloud Secrets
 if not HF_TOKEN:
     try:
         HF_TOKEN = st.secrets["HF_TOKEN"]
@@ -145,7 +145,7 @@ st.markdown(
 
 
 # =========================================================
-# MODEL
+# LOAD MODEL
 # =========================================================
 
 @st.cache_resource
@@ -162,11 +162,14 @@ def load_model():
             huggingfacehub_api_token=HF_TOKEN
         )
 
-        model = ChatHuggingFace(llm=llm)
+        model = ChatHuggingFace(
+            llm=llm
+        )
 
         return model
 
-    except Exception:
+    except Exception as e:
+
         return None
 
 
@@ -306,9 +309,13 @@ for message in st.session_state.messages:
         st.markdown(
             f"""
             <div class="user-message">
+
                 <b>🧑 You</b>
+
                 <br><br>
+
                 {message["content"]}
+
             </div>
             """,
             unsafe_allow_html=True
@@ -319,9 +326,13 @@ for message in st.session_state.messages:
         st.markdown(
             f"""
             <div class="ai-message">
+
                 <b>🤖 AI</b>
+
                 <br><br>
+
                 {message["content"]}
+
             </div>
             """,
             unsafe_allow_html=True
@@ -362,9 +373,13 @@ if question:
     st.markdown(
         f"""
         <div class="user-message">
+
             <b>🧑 You</b>
+
             <br><br>
+
             {question}
+
         </div>
         """,
         unsafe_allow_html=True
@@ -407,9 +422,13 @@ if question:
     st.markdown(
         f"""
         <div class="ai-message">
+
             <b>🤖 AI</b>
+
             <br><br>
+
             {answer}
+
         </div>
         """,
         unsafe_allow_html=True
