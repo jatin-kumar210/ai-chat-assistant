@@ -10,10 +10,10 @@ from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 
 load_dotenv()
 
-# Get Hugging Face token from local .env
+# Local .env
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Get Hugging Face token from Streamlit Cloud Secrets
+# Streamlit Cloud Secrets
 if not HF_TOKEN:
     try:
         HF_TOKEN = st.secrets["HF_TOKEN"]
@@ -145,7 +145,7 @@ st.markdown(
 
 
 # =========================================================
-# LOAD MODEL
+# MODEL
 # =========================================================
 
 @st.cache_resource
@@ -162,14 +162,11 @@ def load_model():
             huggingfacehub_api_token=HF_TOKEN
         )
 
-        model = ChatHuggingFace(
-            llm=llm
-        )
+        model = ChatHuggingFace(llm=llm)
 
         return model
 
-    except Exception as e:
-
+    except Exception:
         return None
 
 
@@ -285,7 +282,7 @@ if len(st.session_state.messages) == 0:
         """
         <div class="welcome-card">
 
-            <h2>👋 Welcome to GenAI Chat Assistant</h2>
+            <h2>👋 Welcome to GenAI Chat Assistant </h2>
 
             <p>
                 Ask questions, learn concepts, generate ideas,
@@ -309,13 +306,9 @@ for message in st.session_state.messages:
         st.markdown(
             f"""
             <div class="user-message">
-
                 <b>🧑 You</b>
-
                 <br><br>
-
                 {message["content"]}
-
             </div>
             """,
             unsafe_allow_html=True
@@ -326,13 +319,9 @@ for message in st.session_state.messages:
         st.markdown(
             f"""
             <div class="ai-message">
-
                 <b>🤖 AI</b>
-
                 <br><br>
-
                 {message["content"]}
-
             </div>
             """,
             unsafe_allow_html=True
@@ -371,20 +360,20 @@ if question:
     # -----------------------------------------------------
 
     st.markdown(
-        f"""
-        <div class="user-message">
+    """
+    <div class="welcome-card">
 
-            <b>🧑 You</b>
+        <h2>👋 Welcome to GenAI Chat Assistant</h2>
 
-            <br><br>
+        <p>
+            Ask questions, learn concepts, generate ideas,
+            or simply have a conversation with AI.
+        </p>
 
-            {question}
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
     # -----------------------------------------------------
     # GENERATE AI RESPONSE
@@ -422,13 +411,9 @@ if question:
     st.markdown(
         f"""
         <div class="ai-message">
-
             <b>🤖 AI</b>
-
             <br><br>
-
             {answer}
-
         </div>
         """,
         unsafe_allow_html=True
