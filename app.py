@@ -10,7 +10,21 @@ from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 
 load_dotenv()
 
+
+# =========================================================
+# GET HUGGING FACE TOKEN
+# Works on both:
+# 1. Local computer -> .env
+# 2. Streamlit Cloud -> Secrets
+# =========================================================
+
 HF_TOKEN = os.getenv("HF_TOKEN")
+
+if not HF_TOKEN:
+    try:
+        HF_TOKEN = st.secrets["HF_TOKEN"]
+    except Exception:
+        HF_TOKEN = None
 
 
 # =========================================================
@@ -108,7 +122,7 @@ st.markdown(
         color: #94a3b8;
     }
 
-    /* Sidebar headings */
+    /* Sidebar title */
     .sidebar-title {
         font-size: 24px;
         font-weight: 700;
@@ -127,26 +141,40 @@ st.markdown(
 
 
 # =========================================================
-# MODEL
+# LOAD AI MODEL
 # =========================================================
 
 @st.cache_resource
 def load_model():
 
+    # Check token
     if not HF_TOKEN:
         return None
 
-    llm = HuggingFaceEndpoint(
-        repo_id="Qwen/Qwen2.5-7B-Instruct",
-        task="text-generation",
-        huggingfacehub_api_token=HF_TOKEN
-    )
+    try:
 
-    model = ChatHuggingFace(llm=llm)
+        llm = HuggingFaceEndpoint(
+            repo_id="Qwen/Qwen2.5-7B-Instruct",
+            task="text-generation",
+            huggingfacehub_api_token=HF_TOKEN
+        )
 
-    return model
+        model = ChatHuggingFace(
+            llm=llm
+        )
+
+        return model
+
+    except Exception as e:
+
+        st.error(
+            f"❌ Model loading failed: {str(e)}"
+        )
+
+        return None
 
 
+# Load model
 model = load_model()
 
 
@@ -173,7 +201,9 @@ with st.sidebar:
 
     st.markdown("### 🧠 Model")
 
-    st.info("Qwen 2.5 7B Instruct")
+    st.info(
+        "Qwen 2.5 7B Instruct"
+    )
 
     st.markdown("### 🛠️ Technologies")
 
@@ -188,7 +218,9 @@ with st.sidebar:
         "🗑️ Clear Chat",
         use_container_width=True
     ):
+
         st.session_state.messages = []
+
         st.rerun()
 
     st.markdown("---")
@@ -203,7 +235,9 @@ with st.sidebar:
 # =========================================================
 
 st.markdown(
-    '<div class="main-title">🤖 GenAI Chat Assistant</div>',
+    '<div class="main-title">'
+    '🤖 GenAI Chat Assistant'
+    '</div>',
     unsafe_allow_html=True
 )
 
@@ -216,14 +250,31 @@ st.markdown(
 
 
 # =========================================================
-# API KEY CHECK
+# TOKEN CHECK
 # =========================================================
 
 if not HF_TOKEN:
 
     st.error(
-        "❌ Hugging Face API token not found. "
-        "Please create a .env file and add HF_TOKEN."
+        "❌ Hugging Face API token not found."
+    )
+
+    st.info(
+        "For Streamlit Cloud, add HF_TOKEN "
+        "inside Settings → Secrets."
+    )
+
+    st.stop()
+
+
+# =========================================================
+# MODEL CHECK
+# =========================================================
+
+if model is None:
+
+    st.error(
+        "❌ AI model could not be initialized."
     )
 
     st.stop()
@@ -239,12 +290,12 @@ if len(st.session_state.messages) == 0:
         """
         <div class="welcome-card">
 
-        <h2>👋 Welcome to GenAI Chat Assistant</h2>
+            <h2>👋 Welcome to GenAI Chat Assistant</h2>
 
-        <p>
-        Ask questions, learn concepts, generate ideas,
-        or simply have a conversation with AI.
-        </p>
+            <p>
+            Ask questions, learn concepts, generate ideas,
+            or simply have a conversation with AI.
+            </p>
 
         </div>
         """,
@@ -263,9 +314,13 @@ for message in st.session_state.messages:
         st.markdown(
             f"""
             <div class="user-message">
+
                 <b>🧑 You</b>
+
                 <br><br>
+
                 {message["content"]}
+
             </div>
             """,
             unsafe_allow_html=True
@@ -276,9 +331,13 @@ for message in st.session_state.messages:
         st.markdown(
             f"""
             <div class="ai-message">
+
                 <b>🤖 AI</b>
+
                 <br><br>
+
                 {message["content"]}
+
             </div>
             """,
             unsafe_allow_html=True
@@ -295,12 +354,15 @@ question = st.chat_input(
 
 
 # =========================================================
-# GENERATE RESPONSE
+# GENERATE AI RESPONSE
 # =========================================================
 
 if question:
 
-    # Save user message
+    # -----------------------------------------------------
+    # SAVE USER MESSAGE
+    # -----------------------------------------------------
+
     st.session_state.messages.append(
         {
             "role": "user",
@@ -308,19 +370,31 @@ if question:
         }
     )
 
-    # Display user message
+
+    # -----------------------------------------------------
+    # DISPLAY USER MESSAGE
+    # -----------------------------------------------------
+
     st.markdown(
         f"""
         <div class="user-message">
+
             <b>🧑 You</b>
+
             <br><br>
+
             {question}
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # Generate AI response
+
+    # -----------------------------------------------------
+    # GENERATE RESPONSE
+    # -----------------------------------------------------
+
     with st.spinner("🤔 AI is thinking..."):
 
         try:
@@ -331,9 +405,16 @@ if question:
 
         except Exception as e:
 
-            answer = f"❌ Error: {str(e)}"
+            answer = (
+                f"❌ Error while generating response:\n\n"
+                f"{str(e)}"
+            )
 
-    # Save AI response
+
+    # -----------------------------------------------------
+    # SAVE AI RESPONSE
+    # -----------------------------------------------------
+
     st.session_state.messages.append(
         {
             "role": "assistant",
@@ -341,13 +422,21 @@ if question:
         }
     )
 
-    # Display AI response
+
+    # -----------------------------------------------------
+    # DISPLAY AI RESPONSE
+    # -----------------------------------------------------
+
     st.markdown(
         f"""
         <div class="ai-message">
+
             <b>🤖 AI</b>
+
             <br><br>
+
             {answer}
+
         </div>
         """,
         unsafe_allow_html=True
