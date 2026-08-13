@@ -279,18 +279,7 @@ if model is None:
 if len(st.session_state.messages) == 0:
 
     st.markdown(
-        """
-        <div class="welcome-card">
-
-            <h2>👋 Welcome to GenAI Chat Assistant </h2>
-
-            <p>
-                Ask questions, learn concepts, generate ideas,
-                or simply have a conversation with AI.
-            </p>
-
-        </div>
-        """,
+       
         unsafe_allow_html=True
     )
 
@@ -360,20 +349,16 @@ if question:
     # -----------------------------------------------------
 
     st.markdown(
-    """
-    <div class="welcome-card">
+        f"""
+        <div class="user-message">
+            <b>🧑 You</b>
+            <br><br>
+            {question}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-        <h2>👋 Welcome to GenAI Chat Assistant</h2>
-
-        <p>
-            Ask questions, learn concepts, generate ideas,
-            or simply have a conversation with AI.
-        </p>
-
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
     # -----------------------------------------------------
     # GENERATE AI RESPONSE
