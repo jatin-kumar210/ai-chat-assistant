@@ -1,6 +1,7 @@
 # 🤖 GenAI Chat Assistant
 
 A modern AI chatbot built using Python, LangChain, Hugging Face, and Streamlit.
+live demo:https://ai-chat-assistant-4unnzdeqtvyp9xdgu9d3of.streamlit.app/
 
 ## 🚀 Features
 
